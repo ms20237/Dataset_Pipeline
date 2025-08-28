@@ -1,0 +1,7 @@
+*.vscode
+*dataset_storage
+__pycache__
+*plots/
+*shuttrix/dataset/
+*introduction.ipynb
+

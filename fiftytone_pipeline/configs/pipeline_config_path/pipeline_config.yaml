@@ -1,0 +1,44 @@
+# A YAML configuration file for the dataset pipeline.
+# General pipeline settings
+ds_dir: ./shuttrix/dataset
+ds_name: my_merged_dataset_name
+ds_format: yolov5
+overwrite: true
+tag_splits: true
+
+# Label remapping
+label_path:  ./configs/label_config_path
+remove_unmapped_labels: false
+
+# Dataset splitting
+ratios: [0.7, 0.15, 0.15]
+untag_other: false
+
+# Similarity analysis
+sim_threshold_path: ./configs/sim_config_path
+mode: between_splits
+model: mobilenet-v2-imagenet-torch
+recompute: true
+similarity_tag: similar_samples
+
+# Merging datasets(None would merged all datasets that you pass to pipeline)
+# if you want to marge datasets by name:
+# list_ds_merge:
+#   - dataset_folder_1
+#   - dataset_folder_2
+#   - dataset_folder_3
+
+list_ds_merge: null
+merged_name: merged_dataset_1
+keep_only_split_tags: true
+
+# Exporting the final dataset
+output_name: uniform_exported_dataset
+export_dir: exported/data
+output_ds_format: yolov5
+export_ds_splits: train test val # for exporting all splits of dataset from fiftyone must be None
+output_label_list: Car
+
+# pipline tasks
+step: null
+run_full_pipeline: false

@@ -1,0 +1,11 @@
+{
+    "car": [
+        "Ambulance",
+        "Car",
+        "Motorcycle",
+        "Bus"
+    ],
+    "truck": [
+        "Truck"
+    ]
+}

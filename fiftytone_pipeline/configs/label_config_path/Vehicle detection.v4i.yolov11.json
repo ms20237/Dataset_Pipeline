@@ -1,0 +1,24 @@
+{
+    "car": [
+        "Ambulance",
+        "Auto",
+        "Bicycle",
+        "Bike",
+        "Bus",
+        "Car",
+        "Motorcycle",
+        "auto-rickshaw",
+        "bus",
+        "car",
+        "motorcycle"
+    ],
+    
+    "truck": [
+        "Truck",
+        "lorry",
+        "mini truck",
+        "truck"
+    ]
+}
+
+

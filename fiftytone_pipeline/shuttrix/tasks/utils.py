@@ -194,3 +194,19 @@ def compute_iou_nbins(view, iou_field="iou"):
     return nbins
 
 
+def get_source_tag(sample, priority_list):
+    """
+    Finds the most prioritized source tag for a given sample.
+    Args:
+        sample: A FiftyOne sample object.
+        priority_list: The list of prioritized dataset names from the JSON.
+    Returns:
+        str: The source tag with the highest priority, or None if no prioritized tag is found.
+    """
+    source_tags = [t for t in sample.tags if t in priority_list]
+    if source_tags:
+        # Sort by the index in the priority list to find the highest priority tag
+        source_tags.sort(key=priority_list.index)
+        return source_tags[0]
+    return None
+

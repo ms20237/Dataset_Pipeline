@@ -6,7 +6,7 @@ from rich import print
 from pprint import pprint
 
 import fiftyone as fo
-from shuttrix.tasks.utils import parse_print_args
+from shuttrix.tasks.utils import parse_print_args, get_source_tag
 
 def init():
     """
@@ -36,21 +36,6 @@ def init():
     args = parser.parse_args()
     return args
 
-def get_source_tag(sample, priority_list):
-    """
-    Finds the most prioritized source tag for a given sample.
-    Args:
-        sample: A FiftyOne sample object.
-        priority_list: The list of prioritized dataset names from the JSON.
-    Returns:
-        str: The source tag with the highest priority, or None if no prioritized tag is found.
-    """
-    source_tags = [t for t in sample.tags if t in priority_list]
-    if source_tags:
-        # Sort by the index in the priority list to find the highest priority tag
-        source_tags.sort(key=priority_list.index)
-        return source_tags[0]
-    return None
 
 @parse_print_args
 def run(ds_name: str, 

@@ -32,7 +32,6 @@ PIPELINE_STEPS = {
 }
 
 def init():
-    # ... (parser definition remains the same)
     parser = argparse.ArgumentParser(description="Dataset PipeLine")
     parser.add_argument("--pipeline_config_path",
                         type=str,
@@ -104,7 +103,7 @@ def init():
     
     parser.add_argument('--model',
                         required=False,
-                        help="choose model for similarity comparison, options: 'clip', 'clip_vit_b32', 'clip_vit_b16', 'clip_vit_l14', 'clip_vit_l14_336', 'clip_vit_h14_224', 'clip_vit_h14_336'")
+                        help="choose model for similarity comparison, options: 'alexnet-imagenet-torch', 'centernet-hg104-1024-coco-tf2', 'centernet-hg104-512-coco-tf2'")
     
     parser.add_argument('--recompute',
                         action='store_true',
@@ -180,6 +179,18 @@ def run(args):
     """
     Main function to run the dataset pipeline based on command-line arguments.
     """
+    
+    print("""
+
+            ███████╗██╗  ██╗██╗   ██╗████████╗████████╗██████╗ ██╗██╗  ██╗
+            ██╔════╝██║  ██║██║   ██║╚══██╔══╝╚══██╔══╝██╔══██╗██║╚██╗██╔╝
+            ███████╗███████║██║   ██║   ██║      ██║   ██████╔╝██║ ╚███╔╝ 
+            ╚════██║██╔══██║██║   ██║   ██║      ██║   ██╔══██╗██║ ██╔██╗ 
+            ███████║██║  ██║╚██████╔╝   ██║      ██║   ██║  ██║██║██╔╝ ██╗
+            ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
+                                                    P i p e l i n e  v1.0.0  
+
+    """)
     
     # Determine the starting step of the pipeline
     pipeline_steps_list = list(PIPELINE_STEPS.keys())

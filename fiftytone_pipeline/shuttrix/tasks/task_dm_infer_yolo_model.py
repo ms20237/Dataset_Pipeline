@@ -12,7 +12,7 @@ def init():
     """
     Initializes and parses command-line arguments for running a model on a FiftyOne dataset.
     """
-    parser = argparse.ArgumentParser(description="Run model inference on a FiftyOne dataset.")
+    parser = argparse.ArgumentParser(description="Run model inference YOLO models on FiftyOne dataset.")
     parser.add_argument('--ds_name',
                         type=str,
                         required=True,
@@ -60,7 +60,7 @@ def run(ds_name: str,
     print(f"""
             ======================================================================================
             
-                                    RUNNING INFERENCE ON DATASET: {ds_name}
+                                    [bold]RUNNING INFERENCE ON DATASET: {ds_name}
             
             ======================================================================================
     """)

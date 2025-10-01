@@ -4,7 +4,7 @@ import os
 
 import fiftyone as fo
 
-from shuttrix.tasks.utils import get_similarity_config, load_config_from_file
+from shuttrix.tasks.utils import parse_print_args, get_similarity_config, load_config_from_file
 from shuttrix.tasks import(
     task_dataset_unzip_unrar,
     task_dataset_yaml_fix,
@@ -174,7 +174,8 @@ def init():
     args = parser.parse_args()
     return parser, args
     
-    
+
+@parse_print_args    
 def run(args):
     """
     Main function to run the dataset pipeline based on command-line arguments.

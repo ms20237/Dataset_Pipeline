@@ -1,12 +1,15 @@
 import sys
 import cv2
-from typing import List
 import math
-from collections import Counter
 import numpy as np
 import os
 import yaml
 import json
+from typing import List
+from collections import Counter
+
+from ultralytics import YOLO
+
 import fiftyone as fo
 
 
@@ -15,6 +18,7 @@ def del_all_datasets():
         print(f"🗑️ Deleting dataset: {name}")
         fo.delete_dataset(name)
     print("Done!!!")    
+
 
 def parse_print_args(func):
     def wrapper(*args, **kwargs):
@@ -210,3 +214,50 @@ def get_source_tag(sample, priority_list):
         return source_tags[0]
     return None
 
+
+
+def load_model(model_path):
+    """
+    Loads your trained model.
+    This is a placeholder. Replace with your model loading code.
+    """
+    print(f"Loading model from: {model_path}...")
+    # Example for a simple placeholder model
+    # import torch
+    # model = torch.load(model_path)
+    # model.eval()
+    print("✅ Model loaded successfully.")
+    return "my_placeholder_model"
+
+
+def run_inference(model, sample):
+    """
+    Performs inference on a single FiftyOne sample.
+    This is a placeholder. Replace with your actual inference logic.
+    """
+    # Example: If your model is a classification model
+    # img = fo.utils.read_image(sample.filepath)
+    # prediction = model(img)
+    # return fo.Classification(label="predicted_label")
+
+    # Example: If your model is a detection model
+    # predictions = [fo.Detection(...), fo.Detection(...)]
+    # return fo.Detections(detections=predictions)
+
+    # Placeholder for a simple, dummy prediction
+    print(f"Performing inference on sample: {sample.filepath}")
+    return fo.Detections(detections=[fo.Detection(label="car", bounding_box=[0.1, 0.1, 0.5, 0.5])])
+
+
+def load_model(model_path):
+    print(f"Loading model from: {model_path}...")
+    try:
+        model = YOLO(model_path)
+        print("✅ Model loaded successfully.")
+        return model
+    except Exception as e:
+        print(f"❌ Failed to load model from {model_path}: {e}")
+        raise
+    
+    
+    

@@ -33,6 +33,11 @@ def init():
                         required=False,
                         help="The name of the field that store evaluation of model (defualt pred_field_name = {dm_name}_Eval).")
     
+    parser.add_argument('--conf_thresh',
+                        type=float,
+                        default=0.3,
+                        help="confidence threshold for visualize in fiftyone.(values between 0-1)")
+    
     parser.add_argument('--only_inf',
                         action='store_true',
                         default=False,
@@ -52,6 +57,7 @@ def run(ds_name: str,
         model_path: str, 
         dm_name: str,
         dm_eval_key: str,
+        conf_thresh: float,
         only_inf: bool,
         only_eval: bool):
     """
@@ -87,13 +93,17 @@ def run(ds_name: str,
     # inference or evaluate model 
     if only_inf:
         print("[green][bold]ONLY INFERENCE MODEL")
-        inf_model = dataset.apply_model(model, pred_field_name)
+        inf_model = dataset.apply_model(model, 
+                                        pred_field_name,
+                                        confidence_thresh=conf_thresh)
     elif only_eval:
         print("[green][bold]ONLY EVALUATE MODEL")
         eval_model = dataset.evaluate_detections(eval_key=dm_eval_key)
     else:
         print("[green][bold]ONLY INFERENCE and EVALUATE MODEL")
-        inf_model = dataset.apply_model(model, pred_field_name)
+        inf_model = dataset.apply_model(model, 
+                                        pred_field_name,
+                                        confidence_thresh=conf_thresh)
         eval_model = dataset.evaluate_detections(pred_field_name,
                                     gt_field="ground_truth",
                                     eval_key=dm_eval_key)
@@ -114,5 +124,6 @@ if __name__ == "__main__":
         args.model_path, 
         args.dm_name,
         args.dm_eval_key,
+        args.conf_thresh,
         args.only_inf,
         args.only_eval)

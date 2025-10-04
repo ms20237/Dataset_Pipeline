@@ -43,7 +43,7 @@ This pipeline helps to standardize dataset creation, reduce errors, and maintain
 ## Repository Structure
 
 Here’s a sample layout of the pipeline directory:
-
+```bash
 fiftytone_pipeline/
 ├── configs/ # Config files (YAML / JSON)
 ├── shuttrix/ # tasks and operators and main pipeline file
@@ -52,4 +52,4 @@ fiftytone_pipeline/
     ├── sandbox/ dont care scripts :)
     └── tasks/ dataset and model scipts 
 └── sim_models/  name of model for finding similar samples in dataset
-
+```

@@ -1,7 +1,7 @@
 # Fiftyone dataset Pipeline
 
 
-
+## Introduction
 This repository implements the **FiftyTone dataset pipeline**, a modular data processing workflow to prepare, transform, and validate datasets for downstream tasks (e.g. training, evaluation, analysis).
 
 ---

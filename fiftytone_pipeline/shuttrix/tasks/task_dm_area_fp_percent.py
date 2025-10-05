@@ -8,7 +8,7 @@ from shuttrix.operators.visualizer import Hist2DVisualizer, AreaVisualizer, Mult
 
 
 def init():
-    parser = argparse.ArgumentParser(description="plot Tp percentage in each dataset area.")
+    parser = argparse.ArgumentParser(description="plot Fp percentage in each dataset area.")
     parser.add_argument("--ds_name",
                         type=str,
                         required=True,
@@ -44,17 +44,11 @@ def init():
 
 
 @parse_print_args
-def run(ds_name: str,
-        dm_name: str,
-        dm_eval_key: str,
-        label_key_name: str,
-        nbins: int,
-        show: bool):
-
+def run(ds_name: str, dm_name: str, dm_eval_key: str, label_key_name: str, nbins: int, show: bool):
     print(f"""
     =======================================================================================================
     
-                                    PLOT TP PERCENTAGE PER AREA IN {ds_name}
+                                      PLOT FP PERCENTAGE PER AREA IN {ds_name}
     
     =======================================================================================================
     """)
@@ -74,15 +68,27 @@ def run(ds_name: str,
 
     all_dets = []
     for sample in tqdm(dataset):
-        if not sample.has_field("ground_truth"):
+        if not sample.has_field(pred_field):
             continue
-        for det in sample["ground_truth"]["detections"]:
-            # Safely get area
-            area = getattr(det, label_key_name, None)
-            # Safely get eval status (like yolov11_eval)
+        for det in sample[pred_field]["detections"]:
+            # Compute area from bounding_box if not available
+            if hasattr(det, "area") and det.area is not None:
+                area = det.area
+            elif hasattr(det, "bounding_box"):
+                # bounding_box = [x, y, w, h]
+                bbox = det.bounding_box
+                if len(bbox) >= 4:
+                    # assuming normalized coordinates
+                    area = bbox[2] * bbox[3]
+                else:
+                    area = None
+            else:
+                area = None
+
+            # Get eval status
             status = det.get_field(eval_key) if det.has_field(eval_key) else None
 
-            if area is not None and status in ["tp", "fn"]:
+            if area is not None and status in ["tp", "fp"]:
                 all_dets.append({"area": area, "status": status})
 
     if not all_dets:
@@ -96,51 +102,58 @@ def run(ds_name: str,
     # Bin areas
     area_min, area_max = areas.min(), areas.max()
     bins = np.linspace(area_min, area_max, nbins + 1)
-    tp_counts, _ = np.histogram(areas[statuses == "tp"], bins=bins)
-    fn_counts, _ = np.histogram(areas[statuses == "fn"], bins=bins)
 
-    tp_percentage = np.divide(tp_counts, tp_counts + fn_counts, 
-                              out=np.zeros_like(tp_counts, dtype=float), 
-                              where=(tp_counts + fn_counts) != 0) * 100
+    fp_counts, _ = np.histogram(areas[statuses == "fp"], bins=bins)
+    tp_counts, _ = np.histogram(areas[statuses == "tp"], bins=bins)
+
+    fp_percentage = np.divide(
+        fp_counts,
+        (tp_counts + fp_counts),
+        out=np.zeros_like(fp_counts, dtype=float),
+        where=(tp_counts + fp_counts) != 0,
+    ) * 100
 
     # Use midpoints of bins for plotting
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
-    print("[INFO] Average TP%:", np.mean(tp_percentage))
+    print("[INFO] Average FP%:", np.mean(fp_percentage))
 
     plots = []
-    # Plot using Hist2DVisualizer (1D style)
-    Tp_plot = Hist2DVisualizer(
-        op_name=f"TP_Percentage_Area",
+
+    # FP% plot
+    Fp_plot = Hist2DVisualizer(
+        op_name=f"FP_Percentage_Area",
         show=show,
         nxbins=nbins,
         nybins=1,
         xrange=area_max,
         yrange=100,
         xaxis="Detection Area",
-        yaxis="TP Percentage (%)",
-        title=f"TP Percentage vs Area ({ds_name})",
-        legend="TP %",
-        use_hist2d=False)
-    Tp_plot.execute(bin_centers.tolist(), tp_percentage.tolist())
-    plots.append(Tp_plot.result)
-    
-    # Plot area of dataset
+        yaxis="FP Percentage (%)",
+        title=f"FP Percentage vs Area ({ds_name})",
+        legend="FP %",
+        use_hist2d=False,
+    )
+    Fp_plot.execute(bin_centers.tolist(), fp_percentage.tolist())
+    plots.append(Fp_plot.result)
+
+    # Area distribution
     area_plot = AreaVisualizer(
-    op_name="Area_Distribution_Quickstart",
-    area_field="area",       # the field inside each detection
-    title="Detection Count per Area Bin",
-    nbins=nbins,
-    show=show)
+        op_name="Area_Distribution_Quickstart",
+        area_field="area",
+        title="Detection Count per Area Bin",
+        nbins=nbins,
+        show=show,
+    )
     area_plot.execute(dataset)
     plots.append(area_plot.result)
-    
+
     multi_plot = MultipleFiguresPlotter(
-        op_name="Tp_Percent_Area",
-        title="TP percent with Area values",
-        placement_type="horizontally",  # or "vertically", "grid", "overlay"
+        op_name="Fp_Percent_Area",
+        title="FP percent with Area values",
+        placement_type="horizontally",
         show=True,
-        cols=len(plots)
+        cols=len(plots),
     )
     multi_plot.execute(plots) 
     

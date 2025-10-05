@@ -47,9 +47,9 @@ Here’s a sample layout of the pipeline directory:
 fiftytone_pipeline/
 ├── configs/ # Config files (YAML / JSON)
 ├── shuttrix/ # tasks and operators and main pipeline file
-    ├── operators/ visualizer and field generators classes
-    ├── pipelines/ dataset and model pipeline
-    ├── sandbox/ dont care scripts :)
-    └── tasks/ dataset and model scipts 
-└── sim_models/  name of model for finding similar samples in dataset
+    ├── operators/ # visualizer and field generators classes
+    ├── pipelines/ # dataset and model pipeline
+    ├── sandbox/ # dont care scripts :)
+    └── tasks/ # dataset and model scipts 
+└── sim_models/  # name of model for finding similar samples in dataset
 ```

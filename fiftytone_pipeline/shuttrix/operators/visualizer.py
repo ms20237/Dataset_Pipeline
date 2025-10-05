@@ -172,7 +172,6 @@ class Hist2DVisualizer(Operator):
                 file_uri = Path(html_path).resolve().as_uri()
                 webbrowser.open(file_uri)
             
-        
     @property
     def result(self):
         """go.Figure: The result of the operator."""

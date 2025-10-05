@@ -46,6 +46,9 @@ def run(ds_name: str):
     # load dataset
     dataset = fo.load_dataset(ds_name)
     print(f"✅ Loaded dataset '{ds_name}' with {len(dataset)} samples")
+    
+    # compute metadata of dataset
+    dataset.compute_metadata() 
 
     # Add detection fields to schema
     dataset.add_sample_field("ground_truth.detections.bbox_norm_width", fo.FloatField)

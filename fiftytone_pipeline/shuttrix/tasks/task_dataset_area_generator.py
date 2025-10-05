@@ -16,7 +16,8 @@ def init():
                         help="Name of the FiftyOne dataset to process",
     )
     
-    return parser.parse_args()
+    args = parser.parse_args()
+    return args  
 
 
 @parse_print_args

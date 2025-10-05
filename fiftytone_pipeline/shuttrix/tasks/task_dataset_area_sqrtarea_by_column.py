@@ -41,6 +41,7 @@ def run(ds_name: str,
         splits: str | list,
         show: bool,
         nbins: int = None,
+        splits_list = ['train', 'val', 'test']
     ): 
     """
         Analyze Sqrt Area FiftyOne dataset.
@@ -54,14 +55,18 @@ def run(ds_name: str,
             None    
     """
     # load dataset
-    dataset = fo.load_dataset(ds_name)  
+    dataset = fo.load_dataset(ds_name) 
+    print(f"✅ Loaded dataset '{ds_name}' with {len(dataset)} samples")
+    
+    # compute metadata of dataset
+    dataset.compute_metadata() 
 
     labels = dataset.distinct("ground_truth.detections.label")
     print("Labels in dataset: ", labels)
     
     # Convert splits string to list
     splits_list = splits if isinstance(splits, list) else ([s.strip() for s in splits.split(",")] if splits else [])
-   
+    
     if nbins is None:    
         nbins = compute_area_nbins(dataset)    
         
@@ -95,6 +100,11 @@ def run(ds_name: str,
         print(f"Processing split: [italic red]{split}")
         view = dataset.match_tags(split)
         
+        # Skip empty splits
+        if len(view) == 0:
+            print(f"[yellow]Skipping split '{split}' (no samples)")
+            continue
+        
         hist_area_split = HistDetectionsAreaSqrtAreaByClass(
             op_name=f"HistDetectionsAreaByClass_{split}",
             title=f"Area by Class for {split} split",
@@ -121,15 +131,16 @@ def run(ds_name: str,
         hist_sqrt_area_split.execute(view)
         figs_sqrt_area.append(hist_sqrt_area_split.result)
 
-    multi_plot_area_per_split = MultipleFiguresPlotter(
-        op_name="Multiplot_Area_Distribution_persplit",
-        title="Multiplot Area Distribution persplit",
-        placement_type="overlay",
-        rows=1,                         
-        cols=len(figs_area),
-        show=True,
-    )
-    multi_plot_area_per_split.execute(figs_area)
+    # print(len(figs_area))
+    # multi_plot_area_per_split = MultipleFiguresPlotter(
+    #     op_name="Multiplot_Area_Distribution_persplit",
+    #     title="Multiplot Area Distribution persplit",
+    #     placement_type="overlay",
+    #     rows=1,                         
+    #     cols=len(figs_area),
+    #     show=True,
+    # )
+    # multi_plot_area_per_split.execute(figs_area)
     
 if __name__ == "__main__":
     args = init()

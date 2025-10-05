@@ -44,7 +44,8 @@ def init():
 @parse_print_args
 def run(ds_name: str, 
         step: str,
-        show: bool):
+        show: bool,
+        splits = ["train", "val", "test"]):
     """
         This function demonstrates the usage of the Filter operator to filter a FiftyOne dataset
         
@@ -55,7 +56,6 @@ def run(ds_name: str,
 
     labels = dataset.distinct("ground_truth.detections.label")
     print("Labels in dataset: ", labels)
-    splits = ["train", "val", "test"]
 
     print(
             """

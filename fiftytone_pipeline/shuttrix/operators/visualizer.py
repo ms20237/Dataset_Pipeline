@@ -3,8 +3,10 @@ import time
 import itertools
 import webbrowser
 import numpy as np
+import math
+from rich import print
 from tqdm import tqdm
-from typing import List
+from typing import List, Dict
 from pathlib import Path
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -940,25 +942,30 @@ class MultipleFiguresPlotter(Operator):
         return res_fig
 
     def plot_grid(self, figures):
-        from plotly.subplots import make_subplots
+        n_figs = len(figures)
+
+        # Automatically adjust rows and cols if not enough for all figures
+        cols = self._config["cols"]
+        rows = math.ceil(n_figs / cols)
+
+        print(f"[INFO] Creating grid for {n_figs} figures → {rows}x{cols}")
 
         res_fig = make_subplots(
-            rows=self._config["rows"],
-            cols=self._config["cols"],
+            rows=rows,
+            cols=cols,
             subplot_titles=[fig["layout"]["title"]["text"] for fig in figures],
         )
 
         for i, fig in enumerate(figures, start=1):
+            row_num = (i - 1) // cols + 1
+            col_num = (i - 1) % cols + 1
+
+            # Apply consistent colors
+            fig = self.apply_colors(fig)
             xaxis_title = fig["layout"]["xaxis"]["title"]["text"]
             yaxis_title = fig["layout"]["yaxis"]["title"]["text"]
-            color = self._get_color(i - 1)
-
-            row_num = (i - 1) // self._config["cols"] + 1
-            col_num = (i - 1) % self._config["cols"] + 1
 
             for trace in fig["data"]:
-                trace.marker = getattr(trace, "marker", {})
-                trace.marker["color"] = color
                 res_fig.add_trace(trace, row=row_num, col=col_num)
 
             res_fig.update_xaxes(title_text=xaxis_title, row=row_num, col=col_num)
@@ -966,14 +973,15 @@ class MultipleFiguresPlotter(Operator):
 
         res_fig.update_layout(
             showlegend=False,
-            height=400 * self._config["rows"],
-            width=600 * self._config["cols"],
+            height=400 * rows,
+            width=600 * cols,
             title_text="Grid View",
             title_x=0.5,
-            title_y=0.95,
         )
 
         return res_fig
+
+    
     def plot_overlay(self, figures):
         """
         Overlay all figures into a single plot (shared x and y axis).
@@ -1164,3 +1172,116 @@ class HistDetectionsAreaSqrtAreaByClass(Operator):
         return self._result
 
 
+class PrecisionRecallPerClass(Operator):
+    """
+    Computes precision/recall per class for detections filtered by bbox size thresholds.
+    """
+
+    def __init__(self, op_name, show, dm_eval_key, title, step_value, step="General"):
+        self._op_name = op_name
+        self._op_type = "PrecisionRecallPerClassBBoxSize"
+        self._config = {
+            "show": show,
+            "eval_key": dm_eval_key,
+            "title": title,
+            "step_value": step_value,
+            "step": step,
+        }
+        self._result = None
+
+    @property
+    def op_name(self):
+        return self._op_name
+
+    @property
+    def op_type(self):
+        return self._op_type
+
+    @property
+    def config(self):
+        return self._config
+
+    def execute(self, dataset):
+        eval_key = self._config["eval_key"]
+        step = self._config["step_value"]
+
+        print(f"[INFO] Computing precision/recall per class with bbox size steps={step}...")
+
+        # Collect all class labels and bbox sizes
+        all_data = []
+        for sample in dataset:
+            for det in sample.ground_truth.detections:
+                cls = det.label
+                h, w = det.bbox_norm_height, det.bbox_norm_width
+                status = getattr(det, eval_key, None)
+                if status in ["tp", "fp", "fn"]:
+                    all_data.append((cls, h, w, status))
+
+        if not all_data:
+            print("❌ No valid detections with eval info found.")
+            return
+
+        # Get unique classes
+        classes = sorted(set(cls for cls, _, _, _ in all_data))
+
+        # Determine max bbox size
+        max_height = max(h for _, h, _, _ in all_data)
+        max_width = max(w for _, _, w, _ in all_data)
+
+        # Define bins
+        height_bins = np.arange(0, max_height + step, step)
+        width_bins = np.arange(0, max_width + step, step)
+        bin_labels = [f"[{round(h,2)},{round(h+step,2)})" for h in height_bins[:-1]]
+
+        saved_figs = []
+        # Loop over bins
+        for i in range(len(height_bins)-1):
+            h_min, h_max = height_bins[i], height_bins[i+1]
+            w_min, w_max = width_bins[i], width_bins[i+1]
+
+            counts = {cls: {"tp": 0, "fp": 0, "fn": 0} for cls in classes}
+            for cls, h, w, status in all_data:
+                if h_min <= h < h_max and w_min <= w < w_max:
+                    counts[cls][status] += 1
+
+            precisions, recalls = [], []
+            for cls in classes:
+                tp, fp, fn = counts[cls]["tp"], counts[cls]["fp"], counts[cls]["fn"]
+                precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+                recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+                precisions.append(precision)
+                recalls.append(recall)
+
+            # Plot per bin
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x=classes, y=precisions, name="Precision", marker_color="cornflowerblue"))
+            fig.add_trace(go.Bar(x=classes, y=recalls, name="Recall", marker_color="lightseagreen"))
+
+            fig.update_layout(
+                title=f"{self._config['title']} (H:{round(h_min,2)}-{round(h_max,2)}, W:{round(w_min,2)}-{round(w_max,2)})",
+                xaxis_title="Class",
+                yaxis_title="Metric Value",
+                yaxis=dict(range=[0,1]),
+                barmode="group",
+                legend=dict(title="Metrics"),
+                template="plotly_white",
+            )
+
+            # Save figure
+            os.makedirs("./plots", exist_ok=True)
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            html_path = f"./plots/{self._op_name}_{timestamp}_{self._config['step']}_H{round(h_min,2)}_W{round(w_min,2)}.html"
+            fig.write_html(html_path)
+            print(f"[INFO] Plot saved to {html_path}")
+            if self._config["show"]:
+                webbrowser.open(Path(html_path).resolve().as_uri())
+
+            saved_figs.append(fig)
+        self._result = saved_figs
+
+    @property
+    def result(self):
+        return self._result
+    
+    
+    

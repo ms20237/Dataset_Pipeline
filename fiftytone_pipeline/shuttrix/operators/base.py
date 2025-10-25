@@ -41,7 +41,6 @@ class Operator:
 
 
 class OperatorType:
-    
     Filter = "Filter"
     Histogram = "Histogram"
     Hist2DVisualizer = "Hist2DVisualizer"

@@ -50,7 +50,6 @@ def init():
 
 
 @parse_print_args
-@parse_print_args
 def run(ds_name: str,
         dm_name: str,
         dm_eval_key: str,

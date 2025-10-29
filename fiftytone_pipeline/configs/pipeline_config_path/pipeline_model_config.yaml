@@ -17,3 +17,13 @@ step_value: 0.01
 step: null
 run_full_pipeline: false
 
+
+
+# | `step`           | `run_full_pipeline`                       | Behavior                                      |
+# | ---------------- | ----------------------------------------- | --------------------------------------------- |
+# | `"plot_tp_area"` | `false`                                   | Starts from `plot_tp_area`                    |
+# | `null`           | `true`                                    | Runs full pipeline                            |
+# | `"full"`         | `false` *(if you added “full” as choice)* | Runs full pipeline                            |
+# | `null`           | `false`                                   | Runs full pipeline *(new default behavior)* |
+
+

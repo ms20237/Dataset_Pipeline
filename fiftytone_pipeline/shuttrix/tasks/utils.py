@@ -118,11 +118,13 @@ def get_similarity_config(path: str, dataset_name: str):
 
 def load_config_from_file(config_path):
     """
-        Loads configuration from a YAML file.
+    Loads configuration from a YAML file.
     """
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found at: {config_path}")
-    with open(config_path, 'r') as f:
+    
+    # Use UTF-8 encoding to avoid Windows UnicodeDecodeError
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
     return config
 

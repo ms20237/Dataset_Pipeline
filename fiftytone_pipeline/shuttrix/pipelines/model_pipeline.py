@@ -102,13 +102,14 @@ def run(args):
         except ValueError:
             raise ValueError(f"Invalid step '{args.step}'. Valid steps are: {list(PIPELINE_STEPS.keys())}")
     else:
-        # Default behavior if no specific mode is chosen
-        print("[yellow]No pipeline mode specified. Defaulting to running the full pipeline.[/yellow]")
+        # Default behavior: run the full pipeline if neither flag is provided
+        print("[yellow]No 'step' or 'run_full_pipeline' specified. Running full pipeline by default.[/yellow]")
         args.run_full_pipeline = True
+        start_step_index = 0
         
     # --- Pipeline execution based on the starting step ---
     
-    ## plot tp/fp/fn model on dataset
+    # plot tp/fp/fn model on dataset
     if start_step_index <= pipeline_steps_list.index("plot_precision/recall_perclass"):
         if args.ds_name is None:
             raise ValueError("The 'ds_name' argument is required for these initial steps.")

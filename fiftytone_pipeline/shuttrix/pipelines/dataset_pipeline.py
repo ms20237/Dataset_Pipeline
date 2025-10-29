@@ -36,7 +36,7 @@ def init():
     parser.add_argument("--pipeline_config_path",
                         type=str,
                         required=False,
-                        default="./configs/pipeline_config_path/pipeline_config.yaml",
+                        default="./configs/pipeline_config_path/dataset_pipeline_config.yaml",
                         help="config path of pipeline to run it.")
     
     parser.add_argument("--ds_dir",
@@ -189,7 +189,7 @@ def run(args):
             ╚════██║██╔══██║██║   ██║   ██║      ██║   ██╔══██╗██║ ██╔██╗ 
             ███████║██║  ██║╚██████╔╝   ██║      ██║   ██║  ██║██║██╔╝ ██╗
             ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝      ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
-                                                    P i p e l i n e  v1.0.0  
+                                            P i p e l i n e (Dataset)  v1.0.0  
 
     """)
     

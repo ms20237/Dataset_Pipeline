@@ -49,7 +49,7 @@ def run(ds_name: str,
         dm_eval_key: str,
         label_key_name: str,
         nbins: int,
-        show: bool):
+        show: bool = False):
 
     print(f"""
     =======================================================================================================

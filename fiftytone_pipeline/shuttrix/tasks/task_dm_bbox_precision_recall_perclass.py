@@ -56,7 +56,7 @@ def run(ds_name: str,
         label_key_name: str,
         nbins: int,
         step_value: float,
-        show: bool):
+        show: bool = False):
 
     print(f"""
     =======================================================================================================

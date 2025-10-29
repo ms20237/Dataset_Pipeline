@@ -44,7 +44,12 @@ def init():
 
 
 @parse_print_args
-def run(ds_name: str, dm_name: str, dm_eval_key: str, label_key_name: str, nbins: int, show: bool):
+def run(ds_name: str, 
+        dm_name: str, 
+        dm_eval_key: str, 
+        label_key_name: str, 
+        nbins: int, 
+        show: bool = False):
     print(f"""
     =======================================================================================================
     

@@ -1284,4 +1284,114 @@ class PrecisionRecallPerClass(Operator):
         return self._result
     
     
+class TpFpFnPerClass(Operator):
+    """
+    Computes and plots counts of TP, FP, FN per class in the dataset, optionally binned by bbox size.
+    Ensures all counts are integers.
+    """
+
+    def __init__(self, op_name, show, dm_eval_key, title, step_value, step="General"):
+        self._op_name = op_name
+        self._op_type = "CountPerClassBBoxSize"
+        self._config = {
+            "show": show,
+            "eval_key": dm_eval_key,
+            "title": title,
+            "step_value": step_value,
+            "step": step,
+        }
+        self._result = None
+
+    @property
+    def op_name(self): return self._op_name
+    @property
+    def op_type(self): return self._op_type
+    @property
+    def config(self): return self._config
+
+    def execute(self, dataset):
+        eval_key = self._config["eval_key"]
+        step = float(self._config["step_value"])
+
+        print(f"[INFO] Counting TP/FP/FN per class (eval_key='{eval_key}') with bbox size step={step}...")
+
+        all_data = []
+
+        for sample in dataset:
+            for field_name in ["ground_truth", "predictions", f"{eval_key}_pred"]:
+                dets = getattr(sample, field_name, None)
+                if dets is None:
+                    continue
+
+                for det in dets.detections:
+                    eval_status = getattr(det, eval_key, None)
+                    if eval_status in ["tp", "fp", "fn"]:
+                        cls = det.label
+                        h, w = det.bounding_box[3], det.bounding_box[2]
+                        all_data.append((cls, float(h), float(w), eval_status))
+
+        if not all_data:
+            print("❌ No valid detections with eval info found. Make sure your detections have per-instance attributes like yolov11_eval.")
+            self._result = []
+            return
+
+        classes = sorted(set(cls for cls, _, _, _ in all_data))
+        max_height = max(h for _, h, _, _ in all_data)
+        max_width = max(w for _, _, w, _ in all_data)
+
+        height_bins = np.arange(0, max_height + step, step)
+        width_bins = np.arange(0, max_width + step, step)
+
+        saved_figs = []
+
+        for i in range(len(height_bins) - 1):
+            for j in range(len(width_bins) - 1):
+                h_min, h_max = height_bins[i], height_bins[i + 1]
+                w_min, w_max = width_bins[j], width_bins[j + 1]
+
+                counts = {cls: {"tp": 0, "fp": 0, "fn": 0} for cls in classes}
+
+                for cls, h, w, status in all_data:
+                    if h_min <= h < h_max and w_min <= w < w_max:
+                        counts[cls][status] += 1
+
+                tp_counts = [int(counts[cls]["tp"]) for cls in classes]
+                fp_counts = [int(counts[cls]["fp"]) for cls in classes]
+                fn_counts = [int(counts[cls]["fn"]) for cls in classes]
+
+                if sum(tp_counts) + sum(fp_counts) + sum(fn_counts) == 0:
+                    continue
+
+                fig = go.Figure()
+                fig.add_trace(go.Bar(x=classes, y=tp_counts, name="True Positives", marker_color="seagreen"))
+                fig.add_trace(go.Bar(x=classes, y=fp_counts, name="False Positives", marker_color="tomato"))
+                fig.add_trace(go.Bar(x=classes, y=fn_counts, name="False Negatives", marker_color="goldenrod"))
+
+                fig.update_layout(
+                    title=f"{self._config['title']} (H: {h_min:.2f}-{h_max:.2f}, W: {w_min:.2f}-{w_max:.2f})",
+                    xaxis_title="Class",
+                    yaxis_title="Count (integer)",
+                    barmode="group",
+                    legend=dict(title="Detection Type"),
+                    template="plotly_white",
+                )
+
+                os.makedirs("./plots", exist_ok=True)
+                timestamp = time.strftime("%Y%m%d-%H%M%S")
+                html_path = f"./plots/{self._op_name}_{timestamp}_H{h_min:.2f}_W{w_min:.2f}.html"
+                fig.write_html(html_path)
+                print(f"[INFO] Plot saved to {html_path}")
+                if self._config["show"]:
+                    webbrowser.open(Path(html_path).resolve().as_uri())
+
+                saved_figs.append(fig)
+
+        self._result = saved_figs
+        print(f"[INFO] Generated {len(saved_figs)} integer-safe figures.")
+
+    @property
+    def result(self):
+        return self._result
+
+
     

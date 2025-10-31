@@ -1,17 +1,17 @@
 # A YAML configuration file for the model analyze pipeline.
 # General pipeline settings
-ds_name: my_dataset_name
+ds_name: quickstart
 
 # model field names
-dm_name: model_name_field
-dm_eval_key: dm_eval_key_field_name
+dm_name: yolov11
+dm_eval_key: yolov11_eval
 
 # label key field name
 label_key_name: "bbox"
 
 # plot configs
 nbins: 80
-step_value: 0.01
+step_value: 0.5
 
 # pipline tasks
 step: null

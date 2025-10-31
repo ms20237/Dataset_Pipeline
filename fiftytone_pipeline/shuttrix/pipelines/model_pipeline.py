@@ -6,7 +6,8 @@ from shuttrix.tasks import(
     task_dm_area_tp_percent,
     task_dm_area_fp_percent,
     task_dm_area_fn_percent,
-    task_dm_bbox_precision_recall_perclass
+    task_dm_bbox_precision_recall_perclass,
+    task_dm_bbox_tp_fp_fn_perclass,
 )
 
 
@@ -15,7 +16,8 @@ PIPELINE_STEPS = {
     "plot_tp_area": task_dm_area_tp_percent.run,
     "plot_fp_area": task_dm_area_fp_percent.run,
     "plot_fn_area": task_dm_area_fn_percent.run,
-    "plot_precision/recall_perclass": task_dm_bbox_precision_recall_perclass.run,
+    "plot_precision_recall_perclass": task_dm_bbox_precision_recall_perclass.run,
+    "plot_tp_fp_fn_perclass": task_dm_bbox_tp_fp_fn_perclass.run,
 }
 
 
@@ -110,7 +112,7 @@ def run(args):
     # --- Pipeline execution based on the starting step ---
     
     # plot tp/fp/fn model on dataset
-    if start_step_index <= pipeline_steps_list.index("plot_precision/recall_perclass"):
+    if start_step_index <= pipeline_steps_list.index("plot_tp_fp_fn_perclass"):
         if args.ds_name is None:
             raise ValueError("The 'ds_name' argument is required for these initial steps.")
         
@@ -144,15 +146,25 @@ def run(args):
                                             label_key_name=args.label_key_name,
                                             nbins=args.nbins)
                 
-        if start_step_index <= pipeline_steps_list.index("plot_precision/recall_perclass"):
-                # plot precision/recall perclass
+        if start_step_index <= pipeline_steps_list.index("plot_precision_recall_perclass"):
+                # Plot precision/recall perclass
                 print(f"[bold]Running 'plot precision/recall perclass'")
                 task_dm_bbox_precision_recall_perclass.run(ds_name=args.ds_name,
                                                             dm_name=args.dm_name,
                                                             dm_eval_key=args.dm_eval_key,
                                                             label_key_name=args.label_key_name,
                                                             nbins=args.nbins,
-                                                            step_value=args.step_value)        
+                                                            step_value=args.step_value)  
+                
+        if start_step_index <= pipeline_steps_list.index("plot_tp_fp_fn_perclass"):
+                # Plot tp_fp_fn perclass
+                print(f"[bold]Running 'plot tp_fp_fn perclass'")
+                task_dm_bbox_tp_fp_fn_perclass.run(ds_name=args.ds_name,
+                                                    dm_name=args.dm_name,
+                                                    dm_eval_key=args.dm_eval_key,
+                                                    label_key_name=args.label_key_name,
+                                                    nbins=args.nbins,
+                                                    step_value=args.step_value)                
         
     print(f"[bold][green]Model pipeline completed successfully![/bold]")
     print("[bold][green]PIPELINE COMPLETE!!!![/bold]")        

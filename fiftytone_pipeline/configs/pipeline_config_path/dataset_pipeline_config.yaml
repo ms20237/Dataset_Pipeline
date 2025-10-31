@@ -42,3 +42,27 @@ output_label_list: Car
 # pipline tasks
 step: null
 run_full_pipeline: false
+
+
+
+# | `step`                | `run_full_pipeline` | Behavior                                                                       |
+# | --------------------- | ------------------- | ------------------------------------------------------------------------------ |
+# | `"unzip_unrar"`       | `false`             | Starts pipeline from `unzip_unrar`                                             |
+# | `"import_one"`        | `false`             | Starts pipeline from `import_one`                                              |
+# | `"merge"`             | `false`             | Starts pipeline from `merge`                                                   |
+# | `"export"`            | `false`             | Starts pipeline from `export`                                                  |
+# | `null`                | `true`              | Runs full pipeline from the beginning                                          |
+# | `null`                | `false`             | Runs default pipeline behavior: currently **full pipeline**, since `step=null` |
+# | `"full"` *(optional)* | `false`             | Runs full pipeline *(if you add `"full"` as a recognized step in your code)*   |
+
+
+# Valid steps:
+# "unzip_unrar"
+# "yaml_fix"
+# "import_one"
+# "remap_labels"
+# "ratio"
+# "similarity"
+# "merge"
+# "uniform_labels"
+# "export"

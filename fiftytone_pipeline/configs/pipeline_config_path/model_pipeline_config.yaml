@@ -27,3 +27,10 @@ run_full_pipeline: false
 # | `null`           | `false`                                   | Runs full pipeline *(new default behavior)* |
 
 
+# Valid steps:
+# "plot_tp_area"
+# "plot_fp_area"
+# "plot_fn_area"
+# "plot_precision_recall_perclass"
+# "plot_tp_fp_fn_perclass
+

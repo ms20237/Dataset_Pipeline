@@ -1,4 +1,4 @@
-# Fiftyone dataset Pipeline
+# Fiftyone Pipeline
 
 
 ## Introduction

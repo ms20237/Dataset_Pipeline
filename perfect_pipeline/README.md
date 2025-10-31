@@ -15,9 +15,3 @@ docker-compose up -d
 prefect config set PREFECT_API_URL="http://127.0.0.1:4200/api"
 prefect server start
 ```
-
-## Teardown
-
-```shell
-docker-compose down
-```
